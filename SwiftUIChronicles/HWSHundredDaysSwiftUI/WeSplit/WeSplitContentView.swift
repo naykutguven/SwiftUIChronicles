@@ -8,27 +8,73 @@
 import SwiftUI
 
 struct WeSplitContentView: View {
-    @State private var tapCount = 0
-    @State private var name = ""
+    @State private var checkAmount = 0.0
+    @State private var numberOfPeople = 2
+    @State private var tipPercentage = 20
 
-    private let students = ["Harry", "Hermione", "Ron"]
-    @State private var selectedStudent = "Harry"
+    @FocusState private var isFocused: Bool
+
+    let tipPercentages = [10, 15, 20, 25, 0]
+
+    private var totalPerPerson: Double {
+        let peopleCount = Double(numberOfPeople + 2)
+        let tipSelection = Double(tipPercentage)
+
+        let tipValue = checkAmount / 100 * tipSelection
+        let grandTotal = checkAmount + tipValue
+        let amountPerPerson = grandTotal / peopleCount
+
+        return amountPerPerson
+    }
 
     var body: some View {
-        Form {
-            Section {
-                Button("Tap count: \(tapCount)") {
-                    tapCount += 1
+        NavigationStack {
+            Form {
+                Section {
+                    TextField(
+                        "Amount",
+                        value: $checkAmount,
+                        format: .currency(code: Locale.current.currency?.identifier ?? "USD")
+                    )
+                    .keyboardType(.decimalPad)
+                    .focused($isFocused)
+
+                    Picker("Number of people", selection: $numberOfPeople) {
+                        ForEach(2 ..< 100) {
+                            Text("\($0) people")
+                        }
+                    }
+                    .pickerStyle(.navigationLink)
+                }
+
+                Section(header: Text("How much tip do you want to leave?")) {
+                    Picker("Tip percentage", selection: $tipPercentage) {
+                        ForEach(0..<101) {
+                            Text($0, format: .percent)
+                        }
+                    }
+                    .pickerStyle(.navigationLink)
+                }
+
+                Section(header: Text("Total amount")) {
+                    Text(
+                        checkAmount + (checkAmount * Double(tipPercentage) / 100),
+                        format: .currency(code: Locale.current.currency?.identifier ?? "USD")
+                    )
+                }
+
+                Section(header: Text("Amount per person")) {
+                    Text(
+                        totalPerPerson,
+                        format: .currency(code: Locale.current.currency?.identifier ?? "USD")
+                    )
                 }
             }
-            Section {
-                TextField("Enter your name", text: $name)
-                Text("Your name is \(name)")
-            }
-            Section(header: Text("Select your student")) {
-                Picker("Select your student", selection: $selectedStudent) {
-                    ForEach(students, id: \.self) {
-                        Text($0)
+            .navigationTitle("WeSplit")
+            .toolbar {
+                if isFocused {
+                    Button("Done") {
+                        isFocused = false
                     }
                 }
             }
