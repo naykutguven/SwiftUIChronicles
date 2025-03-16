@@ -11,7 +11,7 @@ import SwiftUI
 struct SwiftUIChroniclesApp: App {
     var body: some Scene {
         WindowGroup {
-            WeSplitContentView()
+            GuessTheFlagContentView()
         }
     }
 }
