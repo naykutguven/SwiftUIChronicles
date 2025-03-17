@@ -8,104 +8,108 @@
 import SwiftUI
 
 struct GuessTheFlagContentView: View {
-    @State private var showAlert = false
+    @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Monaco", "Nigeria", "Poland", "Spain", "UK", "Ukraine", "US"].shuffled()
+    @State private var correctAnswer = Int.random(in: 0...2)
+
+    @State private var showingScore = false
+    @State private var scoreTitle = ""
+    @State private var score = 0
+    private let maxRounds = 8
+    @State private var currentRound = 0
+    @State private var isGameOver = false
 
     var body: some View {
-        // MARK: - Stacks
+        ZStack {
+            // Nice little trick.
+            RadialGradient(
+                stops: [
+                    .init(color: Color(red: 0.1, green: 0.2, blue: 0.45), location: 0.3),
+                    .init(color: Color(red: 0.76, green: 0.15, blue: 0.26), location: 0.3)
+                ],
+                center: .top,
+                startRadius: 200,
+                endRadius: 700
+            )
+            .ignoresSafeArea()
 
-//        ZStack {
-//            VStack(spacing: 0) {
-//                Color.red
-//                Color.blue
-//            }
-//
-//            Text("Your content")
-//                .foregroundStyle(.secondary)
-//                .padding(50)
-//                .background(.ultraThinMaterial)
-//        }
-//        .ignoresSafeArea()
-
-        // MARK: - Gradient
-//        LinearGradient(
-//            colors: [.red, .blue],
-//            startPoint: .top,
-//            endPoint: .bottom
-//        )
-//
-//        LinearGradient(
-//            stops: [
-//                .init(color: .red, location: 0.4),
-//                .init(color: .blue, location: 0.6)
-//            ],
-//            startPoint: .top,
-//            endPoint: .bottom
-//        )
-//
-//        AngularGradient(
-//            colors: [.red, .yellow, .green, .blue, .purple],
-//            center: .center
-//        )
-//
-//        RadialGradient(
-//            colors: [.red, .yellow, .green, .blue, .purple],
-//            center: .center,
-//            startRadius: 10,
-//            endRadius: 200
-//        )
-//
-//        if #available(iOS 18.0, *) {
-//            MeshGradient(width: 3, height: 3, points: [
-//                .init(0, 0), .init(0.5, 0), .init(1, 0),
-//                .init(0, 0.5), .init(0.5, 0.5), .init(1.0, 0.5),
-//                .init(0, 1), .init(0.5, 1), .init(1, 1)
-//            ], colors: [
-//                .red, .purple, .indigo,
-//                .orange, .white, .blue,
-//                .yellow, .green, .mint
-//            ])
-//        }
-
-        // MARK: - Buttons
-
-        VStack {
-            Button("Button 1") { }
-                .buttonStyle(.bordered)
-            Button("Button 2", role: .destructive) { }
-                .buttonStyle(.bordered)
-            Button("Button 3") { }
-                .buttonStyle(.borderedProminent)
-            Button("Button 4", role: .destructive) { }
-                .buttonStyle(.borderedProminent)
-
-            Button {
-                print("Button with image")
-            } label: {
-                Label("Edit", systemImage: "pencil")
-                    .padding()
+            VStack {
+                Spacer()
+                Text("Guess the Flag")
+                    .font(.largeTitle.bold())
                     .foregroundStyle(.white)
-                    .background(.red)
-                    .clipShape(.buttonBorder)
+
+                VStack(spacing: 15) {
+                    VStack {
+                        Text("Tap the flag of")
+                            .foregroundStyle(.secondary)
+                            .font(.subheadline.weight(.heavy))
+                        Text(countries[correctAnswer])
+                            .foregroundStyle(.white)
+                            .font(.largeTitle.weight(.semibold))
+                    }
+                    
+                    ForEach(0..<3) { number in
+                        Button {
+                            flagTapped(number)
+                        } label: {
+                            Image(countries[number])
+                        }
+                        .clipShape(.capsule)
+                        .shadow(radius: 5)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 20)
+                .background(.regularMaterial)
+                .clipShape(.rect(cornerRadius: 20))
+
+                Spacer()
+                Spacer()
+
+                Text("Your score is \(score)")
+                    .foregroundStyle(.white)
+                    .font(.title.bold())
+
+                Spacer()
             }
+            .padding()
         }
-
-        // MARK: - Alerts
-
-        Button {
-            showAlert = true
-        } label: {
-            Label("Show alert", systemImage: "bell")
-                .padding()
-                .foregroundStyle(.white)
-                .background(.red)
-                .clipShape(.buttonBorder)
-        }
-        .alert("Important Message", isPresented: $showAlert) {
-            Button("Delete", role: .destructive) { }
-            Button("Cancel", role: .cancel) { }
+        .alert(scoreTitle, isPresented: $showingScore) {
+            Button("Continue", action: askQuestion)
         } message: {
-            Text("Please read this.")
+            Text("Your score is \(score)")
         }
+        .alert("Game Over", isPresented: $isGameOver) {
+            Button("Restart", action: reset)
+        } message: {
+            Text("Your final score is \(score)")
+        }
+    }
+
+    private func flagTapped(_ number: Int) {
+        if number == correctAnswer {
+            scoreTitle = "Correct"
+        } else {
+            scoreTitle = "Wrong"
+        }
+        score += number == correctAnswer ? 1 : 0
+        if currentRound == maxRounds {
+            isGameOver = true
+        } else {
+            showingScore = true
+        }
+    }
+
+    private func askQuestion() {
+        currentRound += 1
+        countries.shuffle()
+        correctAnswer = Int.random(in: 0...2)
+    }
+
+    private func reset() {
+        score = 0
+        currentRound = 0
+        askQuestion()
     }
 }
 
