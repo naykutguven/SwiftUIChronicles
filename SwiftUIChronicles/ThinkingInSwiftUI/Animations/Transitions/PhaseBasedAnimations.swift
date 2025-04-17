@@ -28,6 +28,16 @@ struct PhaseBasedAnimationsContentView: View {
         .phaseAnimator([0, -20, 20], trigger: shakes) { content, offset in
             content.offset(x: offset)
         }
+
+        Image(systemName: "dog.circle.fill")
+            .resizable()
+            .frame(width: 100, height: 100)
+            .foregroundStyle(.brown, .green)
+            .phaseAnimator([0, -50, 50], trigger: shakes) { content, offset in
+                content
+                    .rotationEffect(.degrees(offset))
+                    .offset(x: offset)
+            }
     }
 }
 
