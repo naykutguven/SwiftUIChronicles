@@ -70,6 +70,73 @@ struct HWSAnimationsContentView: View {
     }
 }
 
+private struct HWSMoreAnimationsContentView: View {
+    @State private var dragAmount: CGSize = .zero
+    @State private var flag = false
+
+    // the order of animations matters
+    var body: some View {
+        Button("Tap me") {
+            flag.toggle()
+        }
+        .frame(width: 100, height: 100)
+        .background(flag ? .blue : .red)
+        .foregroundColor(.white)
+        .animation(.default, value: flag)
+        .clipShape(.rect(cornerRadius: flag ? 50 : 0))
+        .animation(.spring, value: flag)
+
+        LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing)
+            .aspectRatio(1.5, contentMode: .fit)
+            .frame(width: 300)
+            .clipShape(.rect(cornerRadius: 10))
+            .offset(dragAmount)
+            .gesture(
+                DragGesture()
+                    .onChanged { dragAmount = $0.translation }
+                    .onEnded { _ in withAnimation(.bouncy) { dragAmount = .zero } }
+            )
+    }
+}
+
+private struct HWSCoolGestureSnakeAnimationContentView: View {
+    private let letters = Array("Hello there")
+    @State private var dragAmount: CGSize = .zero
+    @State private var flag = false
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(letters.indices, id: \.self) { index in
+                Text(String(letters[index]))
+                    .padding(5)
+                    .background(flag ? .blue : .red)
+                    .foregroundColor(.white)
+                    .clipShape(.rect(cornerRadius: dragAmount != .zero ? 10 : 0))
+                    .offset(dragAmount)
+                    .animation(.linear.delay(Double(index) / 20), value: dragAmount)
+            }
+        }
+        .gesture(
+            DragGesture()
+                .onChanged { dragAmount = $0.translation }
+                .onEnded { _ in
+                    dragAmount = .zero
+                    flag.toggle()
+                }
+        )
+    }
+}
+
+// MARK: - Previews
+
 #Preview {
     HWSAnimationsContentView()
+}
+
+#Preview("More animations") {
+    HWSMoreAnimationsContentView()
+}
+
+#Preview("More cool animations") {
+    HWSCoolGestureSnakeAnimationContentView()
 }
