@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MoonshotContentView: View {
-    private let astronauts: [String: Astrounaut] = Bundle.main.decode("astronauts.json")
+    private let astronauts: [String: Astronaut] = Bundle.main.decode("astronauts.json")
     private let missions: [Mission] = Bundle.main.decode("missions.json")
 
     let columns = [
@@ -21,10 +21,10 @@ struct MoonshotContentView: View {
                 LazyVGrid(columns: columns) {
                     ForEach(missions) { mission in
                         NavigationLink {
-                            Text("Detail view")
-                        // Using `label` here allows us to show a custom view
-                        // instead of a simple text to navigate users to the detail
-                        // screen
+                            MissionDetailView(mission: mission, astronauts: astronauts)
+                            // Using `label` here allows us to show a custom view
+                            // instead of a simple text to navigate users to the detail
+                            // screen
                         } label: {
                             VStack {
                                 Image(mission.image)
@@ -62,9 +62,123 @@ struct MoonshotContentView: View {
     }
 }
 
+// MARK: - MissionDetailView
+
+private struct MissionDetailView: View {
+    struct CrewMember {
+        let role: String
+        let astronaut: Astronaut
+    }
+
+    let mission: Mission
+    let crew: [CrewMember]
+
+    var body: some View {
+        ScrollView {
+            VStack {
+                Image(mission.image)
+                    .resizable()
+                    .scaledToFit()
+                    .containerRelativeFrame(.horizontal) { width, axis in
+                        width * 0.6
+                    }
+                    .padding(.top)
+
+                VStack(alignment: .leading) {
+                    Rectangle()
+                        .frame(height: 2)
+                        .foregroundStyle(.lightBackground)
+                        .padding(.vertical)
+                    Text("Mission Highlights")
+                        .font(.title.bold())
+                        .padding(.bottom, 5)
+
+                    Text(mission.description)
+                    Rectangle()
+                        .frame(height: 2)
+                        .foregroundStyle(.lightBackground)
+                        .padding(.vertical)
+                    Text("Crew")
+                        .font(.title.bold())
+                        .padding(.bottom, 5)
+                }
+                .padding(.horizontal)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack {
+                        ForEach(crew, id: \.role) { crewMember in
+                            NavigationLink {
+                                AstronautView(astronaut: crewMember.astronaut)
+                            } label: {
+                                HStack {
+                                    Image(crewMember.astronaut.id)
+                                        .resizable()
+                                        .frame(width: 104, height: 72)
+                                        .clipShape(.capsule)
+                                        .overlay(
+                                            Capsule()
+                                                .strokeBorder(.white, lineWidth: 1)
+                                        )
+
+                                    VStack(alignment: .leading) {
+                                        Text(crewMember.astronaut.name)
+                                            .foregroundStyle(.white)
+                                            .font(.headline)
+                                        Text(crewMember.role)
+                                            .foregroundStyle(.white.opacity(0.5))
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(.bottom)
+        }
+        .navigationTitle(mission.displayName)
+        .navigationBarTitleDisplayMode(.inline)
+        .background(.darkBackground)
+    }
+
+    init(mission: Mission, astronauts: [String: Astronaut]) {
+        self.mission = mission
+
+        self.crew = mission.crew.map { member in
+            if let astronaut = astronauts[member.name] {
+                return CrewMember(role: member.role, astronaut: astronaut)
+            } else {
+                fatalError("Missing \(member.name)")
+            }
+        }
+    }
+}
+
+// MARK: - AstronautView
+
+private struct AstronautView: View {
+    let astronaut: Astronaut
+
+    var body: some View {
+        ScrollView {
+            VStack {
+                Image(astronaut.id)
+                    .resizable()
+                    .scaledToFit()
+
+                Text(astronaut.description)
+                    .padding()
+            }
+        }
+        .background(.darkBackground)
+        .navigationTitle(astronaut.name)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
 // MARK: - Data Models
 
-private struct Astrounaut: Identifiable, Codable {
+private struct Astronaut: Identifiable, Codable {
     let id: String
     let name: String
     let description: String
@@ -144,4 +258,12 @@ private extension ShapeStyle where Self == Color {
 
 #Preview {
     MoonshotContentView()
+}
+
+#Preview {
+    let missions: [Mission] = Bundle.main.decode("missions.json")
+    let astronauts: [String: Astronaut] = Bundle.main.decode("astronauts.json")
+
+    MissionDetailView(mission: missions[0], astronauts: astronauts)
+        .preferredColorScheme(.dark)
 }
