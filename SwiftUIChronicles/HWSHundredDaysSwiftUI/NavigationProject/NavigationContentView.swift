@@ -141,11 +141,11 @@ private struct PathDetailView: View {
 
 @Observable
 private class PathStore {
-//    var intPath: [Int] = [] {
-//        didSet {
-//            save()
-//        }
-//    }
+    //    var intPath: [Int] = [] {
+    //        didSet {
+    //            save()
+    //        }
+    //    }
 
     var navPath: NavigationPath {
         didSet {
@@ -156,12 +156,12 @@ private class PathStore {
     private let savePath = URL.documentsDirectory.appending(path: "SavePath")
 
     init() {
-//        if let data = try? Data(contentsOf: savePath),
-//           let decoded = try? JSONDecoder().decode([Int].self, from: data) {
-//            intPath = decoded
-//        } else {
-//            intPath = []
-//        }
+        //        if let data = try? Data(contentsOf: savePath),
+        //           let decoded = try? JSONDecoder().decode([Int].self, from: data) {
+        //            intPath = decoded
+        //        } else {
+        //            intPath = []
+        //        }
 
         if let data = try? Data(contentsOf: savePath),
            let decoded = try? JSONDecoder().decode(NavigationPath.CodableRepresentation.self, from: data) {
@@ -172,10 +172,10 @@ private class PathStore {
     }
 
     private func save() {
-//        guard let data = try? JSONEncoder().encode(intPath) else {
-//            return
-//        }
-//        try? data.write(to: savePath)
+        //        guard let data = try? JSONEncoder().encode(intPath) else {
+        //            return
+        //        }
+        //        try? data.write(to: savePath)
 
         guard let codableRep = navPath.codable,
               let data = try? JSONEncoder().encode(codableRep) else {
@@ -183,6 +183,52 @@ private class PathStore {
         }
 
         try? data.write(to: savePath)
+    }
+}
+
+// MARK: - Customizing Navigation Bar Appearance
+
+private struct CustomNavigationBarContentView: View {
+    @State private var navTitle = "Title goes here"
+    var body: some View {
+        NavigationStack {
+            List(0..<100) { i in
+                Text("Row \(i)")
+            }
+            .navigationTitle($navTitle)
+            // If we use `.inline` mode, we can pass a binding to `navigationTitle`
+            // and change the title dynamically. It shows a little chevron to indicate it.
+            .navigationBarTitleDisplayMode(.inline)
+            // effective when we scroll down
+            .toolbarBackground(.orange)
+            //                .toolbar {
+            //                    ToolbarItem(placement: .topBarLeading) {
+            //                        Button("Tap Me") {
+            //                            // button action here
+            //                        }
+            //                    }
+            //
+            //                    ToolbarItem(placement: .topBarLeading) {
+            //                        Button("Or Tap Me") {
+            //                            // button action here
+            //                        }
+            //                    }
+            //                }
+            // or we could use ToolbarItemGroup
+            .toolbar {
+                ToolbarItemGroup() {
+                    Button("Tap Me") {
+                        // button action here
+                    }
+
+                    Button("Tap Me 2") {
+                        // button action here
+                    }
+                }
+            }
+            // this can be useful when we want to hide the back button
+            .navigationBarBackButtonHidden()
+        }
     }
 }
 
@@ -202,4 +248,8 @@ private class PathStore {
 
 #Preview("Restoring Path") {
     RestoringPathContentView()
+}
+
+#Preview("Custom Navigation Bar") {
+    CustomNavigationBarContentView()
 }
