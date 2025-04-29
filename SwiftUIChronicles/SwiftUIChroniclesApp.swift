@@ -12,8 +12,9 @@ import SwiftUI
 struct SwiftUIChroniclesApp: App {
     var body: some Scene {
         WindowGroup {
-            MoonshotContentView()
+            BookwormContentView()
         }
+        .modelContainer(for: Book.self)
 //        Just added as an example
 //        .modelContainer(for: Student.self)
     }
