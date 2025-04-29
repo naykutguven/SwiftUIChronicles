@@ -10,7 +10,12 @@ import SwiftUI
 
 struct BookwormContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var books: [Book]
+
+    // A simple way would be @Query(sort: \Book.rating, order: .reverse)
+    @Query(sort: [
+        SortDescriptor(\Book.title),
+        SortDescriptor(\Book.author)
+    ]) private var books: [Book]
 
     @State private var showingAddScreen = false
 
@@ -31,12 +36,16 @@ struct BookwormContentView: View {
                         }
                     }
                 }
+                .onDelete(perform: deleteBooks)
             }
             .navigationTitle("Bookworm")
             .navigationDestination(for: Book.self) { book in
-                Text(book.review)
+                BookDetailView(book: book)
             }
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    EditButton()
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Book", systemImage: "plus") {
                         showingAddScreen = true
@@ -46,6 +55,13 @@ struct BookwormContentView: View {
             .sheet(isPresented: $showingAddScreen) {
                 AddBookView()
             }
+        }
+    }
+
+    private func deleteBooks(at offsets: IndexSet) {
+        for offset in offsets {
+            let book = books[offset]
+            modelContext.delete(book)
         }
     }
 }
@@ -167,6 +183,65 @@ private struct EmojiRatingView: View {
     }
 }
 
+private struct BookDetailView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var showingDeleteAlert = false
+
+    let book: Book
+
+    var body: some View {
+        ScrollView {
+            ZStack(alignment: .bottomTrailing) {
+                Image(book.genre)
+                    .resizable()
+                    .scaledToFit()
+
+                Text(book.genre.uppercased())
+                    .fontWeight(.black)
+                    .padding(8)
+                    .foregroundStyle(.white)
+                    .background(.black.opacity(0.75))
+                    .clipShape(.capsule)
+                    .offset(x: -5, y: -5)
+            }
+
+            Text(book.author)
+                .font(.title)
+                .foregroundStyle(.secondary)
+
+            Text(book.review)
+                .padding()
+
+            // Constant because we don't want to change the rating
+            RatingView(rating: .constant(book.rating))
+                .font(.largeTitle)
+        }
+        .navigationTitle(book.title)
+        .navigationBarTitleDisplayMode(.inline)
+        .scrollBounceBehavior(.basedOnSize)
+        .alert("Delete book", isPresented: $showingDeleteAlert) {
+            Button("Delete", role: .destructive, action: deleteBook)
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Are you sure?")
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Delete", systemImage: "trash") {
+                    showingDeleteAlert = true
+                }
+            }
+        }
+    }
+
+    private func deleteBook() {
+        modelContext.delete(book)
+        dismiss()
+    }
+}
+
 // MARK: - SwiftData models
 
 @Model
@@ -196,4 +271,20 @@ final class Book {
 
 #Preview {
     BookwormContentView()
+}
+
+#Preview("Book detail") {
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    if let container = try? ModelContainer(for: Book.self, configurations: config) {
+        let exampleBook = Book(
+            title: "Example",
+            author: "Author",
+            genre: "Fantasy",
+            review: "Great book!",
+            rating: 5
+        )
+
+        BookDetailView(book: exampleBook)
+            .modelContainer(container)
+    }
 }
