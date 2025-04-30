@@ -10,26 +10,20 @@ import SwiftUI
 
 struct SwiftDataTipsContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(
-        // This is how we can filter in SwiftData.
-        filter: #Predicate<HWSSwiftDataUser> { user in
-            user.name.contains("R")
-        },
-        sort: \HWSSwiftDataUser.name
-    ) private var users: [HWSSwiftDataUser]
-//    @State private var path = [HWSSwiftDataUser]()
+    @State private var showingUpcomingOnly = false
+
+    @State private var sortOrder = [
+        SortDescriptor(\HWSSwiftDataUser.name),
+        SortDescriptor(\HWSSwiftDataUser.joinDate),
+    ]
 
     var body: some View {
         NavigationStack /* (path: $path) */ {
-            List(users) { user in
-                NavigationLink(value: user) {
-                    Text(user.name)
-                }
-            }
+            UsersView(
+                minimumJoinDate: showingUpcomingOnly ? .now : .distantPast,
+                sortOrder: sortOrder
+            )
             .navigationTitle("Users")
-//            .navigationDestination(for: HWSSwiftDataUser.self) { user in
-//                EditUserView(user: user)
-//            }
             .toolbar {
                 Button("Add User", systemImage: "plus") {
                     try? modelContext.delete(model: HWSSwiftDataUser.self)
@@ -42,11 +36,27 @@ struct SwiftDataTipsContentView: View {
                     modelContext.insert(second)
                     modelContext.insert(third)
                     modelContext.insert(fourth)
-//                    let user = HWSSwiftDataUser(name: "", city: "", joinDate: .now)
-//                    modelContext.insert(user)
-                    // Basically, inserting a new EditUserView into the navigation stack which then executes navigationDestination. Pretty easy, huh?
-                    // This is very similar to what Notes app does when you create a new note.
-                    // path = [user]
+                }
+
+                Button(showingUpcomingOnly ? "Show All" : "Show Upcoming") {
+                    showingUpcomingOnly.toggle()
+                }
+                Menu("Sort", systemImage: "arrow.up.arrow.down") {
+                    Picker("Sort", selection: $sortOrder) {
+                        Text("Sort by Name")
+                        // This is very useful in Pickers and TabViews
+                        // We can show different views for each selection
+                        // and get the value type we want from tags
+                            .tag([
+                                SortDescriptor(\HWSSwiftDataUser.name),
+                                SortDescriptor(\HWSSwiftDataUser.joinDate)
+                            ])
+                        Text("Sort by Join Date")
+                            .tag([
+                                SortDescriptor(\HWSSwiftDataUser.joinDate),
+                                SortDescriptor(\HWSSwiftDataUser.name)
+                            ])
+                    }
                 }
             }
         }
@@ -69,6 +79,26 @@ private struct EditUserView: View {
     }
 }
 
+private struct UsersView: View {
+    @Query var users: [HWSSwiftDataUser]
+
+    var body: some View {
+        List(users) { user in
+            Text(user.name)
+        }
+    }
+
+    init(minimumJoinDate: Date, sortOrder: [SortDescriptor<HWSSwiftDataUser>]) {
+        // we are changing the underlying query, not the list itself
+        _users = Query(
+            filter: #Predicate<HWSSwiftDataUser> { user in
+                user.joinDate >= minimumJoinDate
+            },
+            sort: sortOrder
+        )
+    }
+}
+
 // MARK: - SwiftData models
 
 @Model
@@ -76,11 +106,25 @@ final class HWSSwiftDataUser {
     var name: String
     var city: String
     var joinDate: Date
+    @Relationship(deleteRule: .cascade) var jobs = [HWSJob]()
 
     init(name: String, city: String, joinDate: Date) {
         self.name = name
         self.city = city
         self.joinDate = joinDate
+    }
+}
+
+@Model
+final class HWSJob {
+    var name: String
+    var priority: Int
+    var owner: HWSSwiftDataUser?
+
+    init(name: String, priority: Int, owner: HWSSwiftDataUser? = nil) {
+        self.name = name
+        self.priority = priority
+        self.owner = owner
     }
 }
 
