@@ -7,6 +7,8 @@
 
 import CoreImage
 import CoreImage.CIFilterBuiltins
+import PhotosUI
+import StoreKit
 import SwiftUI
 
 struct InstafilterLearningsContentView: View {
@@ -139,6 +141,104 @@ private struct ContentUnavailableContentView: View {
     }
 }
 
+// MARK: - Photo picking
+
+private struct PhotoPickerContentView: View {
+    @State private var pickerItems = [PhotosPickerItem]()
+    @State private var selectedImages = [Image]()
+
+    var body: some View {
+        VStack {
+            PhotosPicker(
+                "Select a photo",
+                selection: $pickerItems,
+                maxSelectionCount: 3,
+                matching: .images
+            )
+
+            // another way to customize the button
+//            PhotosPicker(
+//                selection: $pickerItems,
+//                maxSelectionCount: 3,
+//                matching: .any(of: [.images, .not(.screenshots)]),
+//            ) {
+//                Label("Select a photo", systemImage: "photo")
+//            }
+
+            ScrollView {
+                ForEach(0..<selectedImages.count, id: \.self) { index in
+                    selectedImages[index]
+                        .resizable()
+                        .scaledToFit()
+                }
+            }
+            .onChange(of: pickerItems) {
+                Task {
+                    selectedImages.removeAll()
+
+                    for item in pickerItems {
+                        if let loadedImage = try await item.loadTransferable(type: Image.self) {
+                            selectedImages.append(loadedImage)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - How to share content
+
+private struct ShareSheetContentView: View {
+    var body: some View {
+        ShareLink(item: URL(string: "https://www.hackingwithswift.com")!)
+
+        ShareLink(
+            item: URL(string: "https://www.hackingwithswift.com")!,
+            subject: Text("Learn Swift here"),
+            message: Text("Check out the 100 Days of SwiftUI!")
+        )
+
+        ShareLink(
+            item: URL(string: "https://www.hackingwithswift.com")!
+        ) {
+            Label("Spread the word about Swift", systemImage: "swift")
+        }
+
+        let example = Image(.UK)
+
+        ShareLink(
+            item: example,
+            preview: SharePreview("Singapore Airport", image: example)
+        ) {
+            Label("Click to share", systemImage: "airplane")
+                .foregroundStyle(.white)
+                .padding()
+                .background(.blue)
+                .clipShape(.capsule)
+        }
+    }
+}
+
+// MARK: - Ask for an App Store review
+
+private struct AskForReviewContentView: View {
+    // This is necessary
+    @Environment(\.requestReview) private var requestReview
+
+    var body: some View {
+        // This is the simplest way to ask for a review but
+        // this isn't ideal because the user might have blocked
+        // the review request system wide or the OS has shown
+        // many alerts already. It is better to ask for a review
+        // when the time is right, e.g., after the user performed a certain
+        // number of actions or completed a task.
+        Button("Leave a review") {
+            requestReview()
+        }
+    }
+}
+
 // MARK: - Previews
 
 #Preview {
@@ -159,4 +259,12 @@ private struct ContentUnavailableContentView: View {
 
 #Preview("Content Unavailable") {
     ContentUnavailableContentView()
+}
+
+#Preview("Photo Picker") {
+    PhotoPickerContentView()
+}
+
+#Preview("Share Sheet") {
+    ShareSheetContentView()
 }
