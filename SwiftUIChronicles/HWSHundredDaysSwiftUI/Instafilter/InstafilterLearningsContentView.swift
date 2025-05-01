@@ -5,6 +5,8 @@
 //  Created by Aykut Güven on 01.05.25.
 //
 
+import CoreImage
+import CoreImage.CIFilterBuiltins
 import SwiftUI
 
 struct InstafilterLearningsContentView: View {
@@ -78,6 +80,65 @@ private struct TextTransitionContentView: View {
     }
 }
 
+// MARK: - CoreImage and SwiftUI
+
+private struct CoreImageContentView: View {
+    @State private var image: Image?
+
+    var body: some View {
+        VStack {
+            image?
+                .resizable()
+                .scaledToFit()
+                
+        }
+        .onAppear(perform: loadImage)
+    }
+
+    private func loadImage() {
+        let inputImage = UIImage(resource: .mystery)
+        let beginImage = CIImage(image: inputImage)
+
+        let context = CIContext()
+        // some of the new API isn't great or very swifty tbh...
+        let currentFilter = CIFilter.sepiaTone()
+
+        currentFilter.inputImage = beginImage
+        currentFilter.intensity = 1.0
+
+        guard let output = currentFilter.outputImage else { return }
+        guard let cgImage = context.createCGImage(output, from: output.extent) else { return }
+
+        let uiImage = UIImage(cgImage: cgImage)
+        image = Image(uiImage: uiImage)
+    }
+}
+
+// MARK: - "Content Unavailable" view
+
+private struct ContentUnavailableContentView: View {
+    var body: some View {
+        ContentUnavailableView(
+            "No snippets",
+            systemImage: "swift",
+            description: Text("No snippets available at the moment.")
+        )
+
+        // A bit more customization
+        ContentUnavailableView {
+            Label("No snippets", systemImage: "swift")
+                .foregroundStyle(.red)
+        } description: {
+            Text("You don't have any saved snippets yet.")
+        } actions: {
+            Button("Create Snippet") {
+                // create a snippet
+            }
+            .buttonStyle(.borderedProminent)
+        }
+    }
+}
+
 // MARK: - Previews
 
 #Preview {
@@ -90,4 +151,12 @@ private struct TextTransitionContentView: View {
 
 #Preview("Text Transition") {
     TextTransitionContentView()
+}
+
+#Preview("CoreImage and SwiftUI") {
+    CoreImageContentView()
+}
+
+#Preview("Content Unavailable") {
+    ContentUnavailableContentView()
 }
