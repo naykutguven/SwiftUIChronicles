@@ -31,9 +31,22 @@
 		14D3766C2D83194000CB2874 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		14EF995C2DC4BFD600E093CB /* Exceptions for "SwiftUIChronicles" folder in "SwiftUIChronicles" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 149A61DE2D83048F0070B3D1 /* SwiftUIChronicles */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		149A61E12D83048F0070B3D1 /* SwiftUIChronicles */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				14EF995C2DC4BFD600E093CB /* Exceptions for "SwiftUIChronicles" folder in "SwiftUIChronicles" target */,
+			);
 			path = SwiftUIChronicles;
 			sourceTree = "<group>";
 		};
@@ -409,6 +422,8 @@
 				DEVELOPMENT_TEAM = 74Z3YA28F8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SwiftUIChronicles/Info.plist;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "We need to unlock your data";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -442,6 +457,8 @@
 				DEVELOPMENT_TEAM = 74Z3YA28F8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SwiftUIChronicles/Info.plist;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "We need to unlock your data";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
