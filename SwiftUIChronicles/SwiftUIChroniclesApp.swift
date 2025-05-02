@@ -12,9 +12,12 @@ import SwiftUI
 struct SwiftUIChroniclesApp: App {
     var body: some Scene {
         WindowGroup {
-            SwiftDataTipsContentView()
+            BucketListContentView()
         }
-        .modelContainer(for: HWSSwiftDataUser.self)
+//        WindowGroup {
+//            SwiftDataTipsContentView()
+//        }
+//        .modelContainer(for: HWSSwiftDataUser.self)
 //        .modelContainer(for: Book.self)
 //        Just added as an example
 //        .modelContainer(for: Student.self)
