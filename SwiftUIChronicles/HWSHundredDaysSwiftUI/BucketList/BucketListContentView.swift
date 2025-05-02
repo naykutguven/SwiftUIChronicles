@@ -9,8 +9,7 @@ import MapKit
 import SwiftUI
 
 struct BucketListContentView: View {
-    @State private var locations: [BucketItemLocation] = []
-    @State private var selectedLocation: BucketItemLocation?
+    @State private var viewModel = ViewModel()
 
     private let startPosition = MapCameraPosition.region(
         MKCoordinateRegion(
@@ -20,52 +19,49 @@ struct BucketListContentView: View {
     )
 
     var body: some View {
-        MapReader { proxy in
-            Map(initialPosition: startPosition) {
-                ForEach(locations) { location in
-                    Annotation(location.name, coordinate: location.coordinate) {
-                        // ugly, but works
-                        Image(systemName: "star.circle")
-                            .resizable()
-                            .foregroundStyle(.red)
-                            .frame(width: 44, height: 44)
-                            .background(.white)
-                            .clipShape(.circle)
-                        // This is problematic in MapKit... it doesn't
-                        // work as expected. Map always receives the gesture.
-                            .onLongPressGesture {
-                                selectedLocation = location
-                            }
+        if viewModel.isUnlocked {
+            MapReader { proxy in
+                Map(initialPosition: startPosition) {
+                    ForEach(viewModel.locations) { location in
+                        Annotation(location.name, coordinate: location.coordinate) {
+                            // ugly, but works
+                            Image(systemName: "star.circle")
+                                .resizable()
+                                .foregroundStyle(.red)
+                                .frame(width: 44, height: 44)
+                                .background(.white)
+                                .clipShape(.circle)
+                            // This is problematic in MapKit... it doesn't
+                            // work as expected. Map always receives the gesture.
+                                .onLongPressGesture {
+                                    viewModel.selectedLocation = location
+                                }
+                        }
+                    }
+                }
+                .onTapGesture { position in // in screen coordinates
+                    guard let coordinate = proxy.convert(position, from: .local) else { return }
+                    viewModel.addLocation(at: coordinate)
+                }
+                .sheet(item: $viewModel.selectedLocation) { place in
+                    BucketItemLocationEditView(location: place) {
+                        viewModel.update(location: $0)
                     }
                 }
             }
-            .onTapGesture { position in // in screen coordinates
-                guard let coordinate = proxy.convert(position, from: .local) else { return }
-
-                let newLocation = BucketItemLocation(
-                    id: UUID(),
-                    name: "New Location",
-                    description: "Description",
-                    latitude: coordinate.latitude,
-                    longitude: coordinate.longitude
-                )
-
-                locations.append(newLocation)
-            }
-            .sheet(item: $selectedLocation) { place in
-                LocationEditView(location: place) { newLocation in
-                    if let index = locations.firstIndex(of: newLocation) {
-                        locations[index] = newLocation
-                    }
-                }
-            }
+        } else {
+            Button("Unlock", action: viewModel.authenticate)
+            .padding()
+            .background(.blue)
+            .foregroundStyle(.white)
+            .clipShape(.capsule)
         }
     }
 }
 
 // MARK: - LocationEditView
 
-private struct LocationEditView: View {
+private struct BucketItemLocationEditView: View {
     enum LoadingState {
         case loading, loaded, failed
     }
@@ -158,7 +154,7 @@ private struct LocationEditView: View {
 
 // MARK: - Data models
 
-private struct BucketItemLocation: Codable, Equatable, Identifiable {
+struct BucketItemLocation: Codable, Equatable, Identifiable {
     #if DEBUG
     static let example = BucketItemLocation(
         id: UUID(),
@@ -185,15 +181,15 @@ private struct BucketItemLocation: Codable, Equatable, Identifiable {
     }
 }
 
-private struct WikiResult: Codable {
+struct WikiResult: Codable {
     let query: WikiQuery
 }
 
-private struct WikiQuery: Codable {
+struct WikiQuery: Codable {
     let pages: [Int: WikiPage]
 }
 
-private struct WikiPage: Codable, Comparable {
+struct WikiPage: Codable, Comparable {
     let pageid: Int
     let title: String
     let terms: [String: [String]]?
