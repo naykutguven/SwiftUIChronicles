@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		14EF996B2DC6512600E093CB /* SamplePackage in Frameworks */ = {isa = PBXBuildFile; productRef = 14EF996A2DC6512600E093CB /* SamplePackage */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		149A61F02D8304900070B3D1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -67,6 +71,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				14EF996B2DC6512600E093CB /* SamplePackage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -129,6 +134,7 @@
 			);
 			name = SwiftUIChronicles;
 			packageProductDependencies = (
+				14EF996A2DC6512600E093CB /* SamplePackage */,
 			);
 			productName = SwiftUIChronicles;
 			productReference = 149A61DF2D83048F0070B3D1 /* SwiftUIChronicles.app */;
@@ -212,6 +218,9 @@
 			);
 			mainGroup = 149A61D62D83048F0070B3D1;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				14EF99692DC6512600E093CB /* XCRemoteSwiftPackageReference "SamplePackage" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 149A61E02D83048F0070B3D1 /* Products */;
 			projectDirPath = "";
@@ -593,6 +602,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		14EF99692DC6512600E093CB /* XCRemoteSwiftPackageReference "SamplePackage" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/twostraws/SamplePackage";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		14EF996A2DC6512600E093CB /* SamplePackage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 14EF99692DC6512600E093CB /* XCRemoteSwiftPackageReference "SamplePackage" */;
+			productName = SamplePackage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 149A61D72D83048F0070B3D1 /* Project object */;
 }
