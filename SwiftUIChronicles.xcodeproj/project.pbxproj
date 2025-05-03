@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		14EF996B2DC6512600E093CB /* SamplePackage in Frameworks */ = {isa = PBXBuildFile; productRef = 14EF996A2DC6512600E093CB /* SamplePackage */; };
+		14EF99762DC6864600E093CB /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 14EF99752DC6864600E093CB /* CodeScanner */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,6 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				14EF99762DC6864600E093CB /* CodeScanner in Frameworks */,
 				14EF996B2DC6512600E093CB /* SamplePackage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -135,6 +137,7 @@
 			name = SwiftUIChronicles;
 			packageProductDependencies = (
 				14EF996A2DC6512600E093CB /* SamplePackage */,
+				14EF99752DC6864600E093CB /* CodeScanner */,
 			);
 			productName = SwiftUIChronicles;
 			productReference = 149A61DF2D83048F0070B3D1 /* SwiftUIChronicles.app */;
@@ -220,6 +223,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				14EF99692DC6512600E093CB /* XCRemoteSwiftPackageReference "SamplePackage" */,
+				14EF99742DC6864600E093CB /* XCRemoteSwiftPackageReference "CodeScanner" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 149A61E02D83048F0070B3D1 /* Products */;
@@ -432,6 +436,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SwiftUIChronicles/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need to scan QR codes.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "We need to unlock your data";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -467,6 +472,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SwiftUIChronicles/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need to scan QR codes.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "We need to unlock your data";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -612,6 +618,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		14EF99742DC6864600E093CB /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/twostraws/CodeScanner";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -619,6 +633,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 14EF99692DC6512600E093CB /* XCRemoteSwiftPackageReference "SamplePackage" */;
 			productName = SamplePackage;
+		};
+		14EF99752DC6864600E093CB /* CodeScanner */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 14EF99742DC6864600E093CB /* XCRemoteSwiftPackageReference "CodeScanner" */;
+			productName = CodeScanner;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
