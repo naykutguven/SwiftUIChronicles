@@ -79,6 +79,38 @@ private struct TabViewSelectionContentView: View {
     }
 }
 
+// MARK: - Context menu and deep touch
+
+private struct ContextMenuContentView: View {
+    @State private var backgroundColor = Color.red
+
+    var body: some View {
+        VStack {
+            Text("Hello, World!")
+                .padding()
+                .background(backgroundColor)
+
+            Text("Change Color")
+                .padding()
+                // This is a context menu which is shown when we
+                // long (deep) press on the view
+                .contextMenu {
+                    Button("Red") {
+                        backgroundColor = .red
+                    }
+
+                    Button("Green") {
+                        backgroundColor = .green
+                    }
+
+                    Button("Blue") {
+                        backgroundColor = .blue
+                    }
+                }
+        }
+    }
+}
+
 // MARK: - Previews
 
 #Preview {
@@ -91,4 +123,8 @@ private struct TabViewSelectionContentView: View {
 
 #Preview("TabView Selection") {
     TabViewSelectionContentView()
+}
+
+#Preview("Context Menu") {
+    ContextMenuContentView()
 }
