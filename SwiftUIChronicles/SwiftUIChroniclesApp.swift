@@ -12,8 +12,10 @@ import SwiftUI
 struct SwiftUIChroniclesApp: App {
     var body: some Scene {
         WindowGroup {
-            BucketListContentView()
+            HotProspectsContentView()
         }
+        .modelContainer(for: Prospect.self)
+
 //        WindowGroup {
 //            SwiftDataTipsContentView()
 //        }
