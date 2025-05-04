@@ -8,7 +8,17 @@
 import SwiftUI
 
 struct FlashzillaContentView: View {
+    // accessibility support for color blindness
+    @Environment(\.accessibilityDifferentiateWithoutColor) var differentiateWithoutColor
+
     @State private var cards = Array(repeating: Card.example, count: 10)
+
+    // Gotta stop the timer when the app is in the background
+    @Environment(\.scenePhase) var scenePhase
+    @State private var isActive = true
+    @State private var timeRemaining = 100
+
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
         ZStack {
@@ -16,6 +26,14 @@ struct FlashzillaContentView: View {
                 .resizable()
                 .ignoresSafeArea()
             VStack {
+                Text("Time: \(timeRemaining)")
+                    .font(.largeTitle)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 5)
+                    .background(.black.opacity(0.75))
+                    .clipShape(.capsule)
+
                 ZStack {
                     ForEach(cards.indices, id: \.self) { index in
                         CardView(card: cards[index], removal: {
@@ -26,18 +44,76 @@ struct FlashzillaContentView: View {
                         .stacked(at: index, in: cards.count)
                     }
                 }
+                .allowsHitTesting(timeRemaining > 0)
+
+                if cards.isEmpty {
+                    Button("Start again", action: resetCards)
+                        .padding()
+                        .background(.white)
+                        .foregroundStyle(.black)
+                        .clipShape(.capsule)
+                }
+            }
+
+            if differentiateWithoutColor {
+                VStack {
+                    Spacer()
+                    HStack {
+                        Image(systemName: "xmark.circle")
+                            .padding()
+                            .background(.black.opacity(0.7))
+                            .clipShape(.circle)
+                        Spacer()
+                        Image(systemName: "checkmark.circle")
+                            .padding()
+                            .background(.black.opacity(0.7))
+                            .clipShape(.circle)
+                    }
+                    .foregroundStyle(.white)
+                    .font(.largeTitle)
+                    .padding()
+                }
+            }
+        }
+        .onReceive(timer) { time in
+            guard isActive else { return }
+
+            if timeRemaining > 0 {
+                timeRemaining -= 1
+            }
+        }
+        .onChange(of: scenePhase) {
+            if scenePhase == .active {
+                if cards.isEmpty == false {
+                    isActive = true
+                }
+            } else {
+                isActive = false
             }
         }
     }
 
     private func removeCard(at index: Int) {
         cards.remove(at: index)
+
+        if cards.isEmpty {
+            isActive = false
+        }
+    }
+
+    private func resetCards() {
+        cards = Array(repeating: Card.example, count: 10)
+        timeRemaining = 100
+        isActive = true
     }
 }
 
 // MARK: - CardView
 
 private struct CardView: View {
+    // Some accessibility support for color blindness
+    @Environment(\.accessibilityDifferentiateWithoutColor) var differentiateWithoutColor
+
     @State private var isShowingAnswer = false
     @State private var offset = CGSize.zero
 
@@ -48,7 +124,17 @@ private struct CardView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 25)
-                .fill(.white)
+                .fill(
+                    differentiateWithoutColor
+                    ? .white
+                    : .white.opacity(1 - Double(abs(offset.width / 50)))
+                )
+                .background(
+                    differentiateWithoutColor
+                    ? nil
+                    : RoundedRectangle(cornerRadius: 25)
+                        .fill(offset.width > 0 ? .green : .red)
+                )
                 .shadow(radius: 10)
 
             VStack {
