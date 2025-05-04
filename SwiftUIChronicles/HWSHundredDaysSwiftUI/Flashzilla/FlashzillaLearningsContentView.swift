@@ -184,8 +184,8 @@ private struct HitTestingContentView: View {
 
             Circle()
                 .fill(.red)
-                // SwiftUI handles not receiving hits on the transparent
-                // parts of the circle
+            // SwiftUI handles not receiving hits on the transparent
+            // parts of the circle
                 .frame(width: 200, height: 200)
                 .onTapGesture {
                     print("Circle tapped!")
@@ -244,6 +244,63 @@ private struct HitTestingContentView: View {
     }
 }
 
+// MARK: - Timer
+
+private struct TimerContentView: View {
+    @State private var counter = 0
+    // We could also add "tolerance" to the timer to make it more battery efficient
+    // This means the OS can delay the timer just a bit to save battery.
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+
+    var body: some View {
+        Text("Hello, World!")
+            .onReceive(timer) { time in
+                if counter == 5 {
+                    timer.upstream.connect().cancel()
+                } else {
+                    print("The time is now \(time)")
+                }
+
+                counter += 1
+            }
+    }
+
+    func cancelTimer() {
+        // Kinda hard to find...
+        timer.upstream.connect().cancel()
+    }
+}
+
+// MARK: - App State
+
+private struct AppStateContentView: View {
+    @Environment(\.scenePhase) private var scenePhase
+
+    var body: some View {
+        Text("Hello, world!")
+            .onChange(of: scenePhase) { oldPhase, newPhase in
+                if newPhase == .active {
+                    // Active scenes are running right now, which on iOS means
+                    // they are visible to the user. On macOS an app’s window might
+                    // be wholly hidden by another app’s window, but that’s okay
+                    // – it’s still considered to be active.
+                    print("Active")
+                } else if newPhase == .inactive {
+                    // Inactive scenes are running and might be visible to
+                    // the user, but the user isn’t able to access them. For
+                    // example, if you’re swiping down to partially reveal the
+                    // control center then the app underneath is considered inactive.
+                    print("Inactive")
+                } else if newPhase == .background {
+                    // Background scenes are not visible to the user, which on iOS
+                    // means they might be terminated at some point in the future.
+                    print("Background")
+                }
+            }
+
+    }
+}
+
 // MARK: - Tap style
 
 private extension View {
@@ -280,4 +337,12 @@ private extension View {
 
 #Preview("Hit testing") {
     HitTestingContentView()
+}
+
+#Preview("Timer") {
+    TimerContentView()
+}
+
+#Preview("App state") {
+    AppStateContentView()
 }
