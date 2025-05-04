@@ -297,7 +297,6 @@ private struct AppStateContentView: View {
                     print("Background")
                 }
             }
-
     }
 }
 
