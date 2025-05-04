@@ -10,6 +10,7 @@ import SwiftUI
 struct FlashzillaContentView: View {
     // accessibility support for color blindness
     @Environment(\.accessibilityDifferentiateWithoutColor) var differentiateWithoutColor
+    @Environment(\.accessibilityVoiceOverEnabled) var voiceOverEnabled
 
     @State private var cards = Array(repeating: Card.example, count: 10)
 
@@ -22,7 +23,7 @@ struct FlashzillaContentView: View {
 
     var body: some View {
         ZStack {
-            Image(.background)
+            Image(decorative: "background")
                 .resizable()
                 .ignoresSafeArea()
             VStack {
@@ -42,6 +43,10 @@ struct FlashzillaContentView: View {
                             }
                         })
                         .stacked(at: index, in: cards.count)
+                        // Only allow the top (last) card to be tapped
+                        .allowsHitTesting(index == cards.count - 1)
+                        // Only allow the top (last) card to be dragged in accessibility
+                        .accessibilityHidden(index < cards.count - 1)
                     }
                 }
                 .allowsHitTesting(timeRemaining > 0)
@@ -55,19 +60,37 @@ struct FlashzillaContentView: View {
                 }
             }
 
-            if differentiateWithoutColor {
+            if differentiateWithoutColor || voiceOverEnabled {
                 VStack {
                     Spacer()
                     HStack {
-                        Image(systemName: "xmark.circle")
-                            .padding()
-                            .background(.black.opacity(0.7))
-                            .clipShape(.circle)
+                        Button {
+                            withAnimation {
+                                removeCard(at: cards.count - 1)
+                            }
+                        } label: {
+                            Image(systemName: "xmark.circle")
+                                .padding()
+                                .background(.black.opacity(0.7))
+                                .clipShape(.circle)
+                        }
+                        .accessibilityLabel("Wrong")
+                        .accessibilityHint("Mark this card wrong")
+
                         Spacer()
-                        Image(systemName: "checkmark.circle")
-                            .padding()
-                            .background(.black.opacity(0.7))
-                            .clipShape(.circle)
+
+                        Button {
+                            withAnimation {
+                                removeCard(at: cards.count - 1)
+                            }
+                        } label: {
+                            Image(systemName: "checkmark.circle")
+                                .padding()
+                                .background(.black.opacity(0.7))
+                                .clipShape(.circle)
+                        }
+                        .accessibilityLabel("Correct")
+                        .accessibilityHint("Mark this card correct")
                     }
                     .foregroundStyle(.white)
                     .font(.largeTitle)
@@ -94,6 +117,7 @@ struct FlashzillaContentView: View {
     }
 
     private func removeCard(at index: Int) {
+        guard index >= 0 && index < cards.count else { return }
         cards.remove(at: index)
 
         if cards.isEmpty {
@@ -113,6 +137,7 @@ struct FlashzillaContentView: View {
 private struct CardView: View {
     // Some accessibility support for color blindness
     @Environment(\.accessibilityDifferentiateWithoutColor) var differentiateWithoutColor
+    @Environment(\.accessibilityVoiceOverEnabled) var voiceOverEnabled
 
     @State private var isShowingAnswer = false
     @State private var offset = CGSize.zero
@@ -138,14 +163,20 @@ private struct CardView: View {
                 .shadow(radius: 10)
 
             VStack {
-                Text(card.prompt)
-                    .font(.largeTitle)
-                    .foregroundStyle(.black)
+                if voiceOverEnabled {
+                    Text(isShowingAnswer ? card.answer : card.prompt)
+                        .font(.largeTitle)
+                        .foregroundStyle(.black)
+                } else {
+                    Text(card.prompt)
+                        .font(.largeTitle)
+                        .foregroundStyle(.black)
 
-                if isShowingAnswer {
-                    Text(card.answer)
-                        .font(.title)
-                        .foregroundStyle(.secondary)
+                    if isShowingAnswer {
+                        Text(card.answer)
+                            .font(.title)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
             .padding(20)
@@ -158,6 +189,7 @@ private struct CardView: View {
         // Starts fading out the card when it is moved more than
         // 50 points left or right
         .opacity(2 - Double(abs(offset.width / 50)))
+        .accessibilityAddTraits(.isButton)
         .gesture(
             DragGesture()
                 .onChanged { gesture in
@@ -174,7 +206,8 @@ private struct CardView: View {
         .onTapGesture {
             isShowingAnswer.toggle()
         }
-
+        // To animate the card back to its original position
+        .animation(.default, value: offset)
     }
 }
 
