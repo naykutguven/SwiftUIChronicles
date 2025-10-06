@@ -24,7 +24,7 @@ import SwiftUI
 /// In iOS 17, the concepts of object lifetime and observation were separated.
 struct ObservableMacroContentView: View {
     var body: some View {
-        Text("Hello, World!")
+        CounterView()
     }
 }
 
@@ -32,6 +32,7 @@ struct ObservableMacroContentView: View {
 @Observable
 final class Model {
     var value = 0
+    var value2 = 0
 }
 
 /// From an ownership perspective, using `@State` together with an `Observable` object
@@ -46,8 +47,77 @@ struct CounterView: View {
         Button("Increment: \(model.value)") {
             model.value += 1
         }
+        .background(Color.random)
+
+        // This view's body is not triggered when `value` changes
+        SubExpView(count: model)
     }
 }
+
+struct SubExpView: View {
+    @Bindable var count: Model
+
+    /// If you use `@Binding` instead of `@Bindable`, updates to this property also triggers a view update in the parent
+    /// view. Better use `@Bindable` if we need to read and manipulate a value.
+    // @Binding var value: Int
+
+    var body: some View {
+        Button("Increment: \(count.value2)") {
+            count.value2 += 1
+        }
+        .background(Color.random)
+    }
+}
+
+// MARK: - Another way to avoid unnecessary view renders
+
+@Observable
+private final class OuterModel {
+    var value: Int = 0
+    var innerModel: InnerModel = InnerModel()
+}
+
+@Observable
+private final class InnerModel {
+    var value: Int = 0
+}
+
+private struct SomeContentView: View {
+    @State private var model = OuterModel()
+
+    var body: some View {
+        Button("Outer Increment: \(model.value)") {
+            model.value += 1
+        }
+        .padding()
+        .background(Color.random.opacity(0.2))
+
+        // This view's body is not triggered when `value` changes
+        InnerView(model: model.innerModel)
+
+        InnerView(model: model.innerModel)
+    }
+}
+
+private struct InnerView: View {
+    /// This still works without `@Bindable` because the model object is `@Observable`.
+    /// This way, we can pass in only the necessary data and still update only the view that
+    /// read that piece of data. In this example, only the two `InnerView`s are rendered again.
+    var model: InnerModel
+
+    /// If you use `@Binding` instead of `@Bindable`, updates to this property also triggers a view update in the parent
+    /// view. Better use `@Bindable` if we need to read and manipulate a value.
+    // @Binding var value: Int
+
+    var body: some View {
+        Button("Inner Increment: \(model.value)") {
+            model.value += 1
+        }
+        .padding()
+        .background(Color.random.opacity(0.2))
+    }
+}
+
 
 // MARK: - Using Observable Objects without @State
 
@@ -55,6 +125,7 @@ struct CounterView: View {
 @Observable
 final class ModelShared {
     var value = 0
+    var value2 = 0
     static let shared = ModelShared()
 }
 
@@ -101,6 +172,7 @@ struct CounterShared: View {
         Button("Increment: \(model.value)") {
             model.value += 1
         }
+        .background(Color.random)
     }
 }
 
@@ -111,6 +183,36 @@ struct CounterSharedContentView: View {
         Button("This also increments: \(ModelShared.shared.value)") {
             ModelShared.shared.value += 1
         }
+
+        Button("This also increments: \(ModelShared.shared.value2)") {
+            ModelShared.shared.value2 += 1
+        }
+    }
+}
+
+// MARK: - Injecting a value for an Observable model in view's initializer
+
+/// This should be avoided because if the view is already onscreen and we pass a different value to the initializer,
+/// this won't change the title of the button. Only the initial value of the `@State` property will be changed to
+/// the new CounterViewModel instance, which will only be used the next time the view is inserted into the render tree.
+@Observable
+private final class CounterViewModel {
+    var value: Int
+
+    init(value: Int) {
+        self.value = value
+    }
+}
+
+private struct InjectedCounter: View {
+    @State private var model: CounterViewModel
+
+    init(value: Int) {
+        self.model = CounterViewModel(value: value)
+    }
+
+    var body: some View {
+        Button("\(model.value)") { model.value += 1}
     }
 }
 
@@ -137,4 +239,8 @@ struct CounterSharedContentView: View {
 
 #Preview("Counter View with shared model, without @State") {
     CounterSharedContentView()
+}
+
+#Preview {
+    SomeContentView()
 }

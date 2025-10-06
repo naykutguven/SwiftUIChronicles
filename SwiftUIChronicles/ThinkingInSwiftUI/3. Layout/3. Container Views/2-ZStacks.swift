@@ -27,6 +27,7 @@ struct ZStackContentView: View {
                 }
         }
         .border(.red)
+        .frame(width: 300)
     }
 }
 
@@ -51,7 +52,7 @@ private extension View {
                     RoundedRectangle(cornerRadius: 5)
                         .fill(.cyan).opacity(0.5)
                 )
-                .fixedSize()
+//                .fixedSize()
         }
     }
 }

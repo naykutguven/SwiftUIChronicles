@@ -78,12 +78,33 @@ struct HallContentView: View {
     @State private var selectedRoom = "Hallway"
     var body: some View {
         VStack {
+
+            if #available(iOS 18.0, *) {
+                Picker(
+                    selection: $selectedRoom
+                ) {
+                    ForEach(["Hallway", "Living Room", "Kitchen"], id: \.self) { value in
+                        Text(value).tag(value)
+                    }
+                } label: {
+                    Text("asdas")
+                } currentValueLabel: {
+                    Text(selectedRoom)
+                        .padding()
+                        .background(.red)
+                }
+                .pickerStyle(.segmented)
+            }
+
+
             Picker("Room", selection: $selectedRoom) {
                 ForEach(["Hallway", "Living Room", "Kitchen"], id: \.self) { value in
                     Text(value).tag(value)
                 }
             }
+            .tint(.indigo)
             .pickerStyle(.segmented)
+            .tint(.indigo)
             ObservedObjectCounter(model: HallModel.shared.counterModel(for: selectedRoom))
         }
     }

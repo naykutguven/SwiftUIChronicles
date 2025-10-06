@@ -76,7 +76,7 @@ struct EnvironmentContentView: View {
 // MARK: - Reading from the Environment
 
 /// We can read from the environment using the `@Environment` property wrapper.
-/// This gives access to a specific value in the environment and obsersves the
+/// This gives access to a specific value in the environment and observes the
 /// environment for any changes to that value. This means that in SwiftUI, any time an
 /// environment value, for example current locale, changes, all views that read
 /// that value will be re-rendered. So, we don't need extra mechanisms to

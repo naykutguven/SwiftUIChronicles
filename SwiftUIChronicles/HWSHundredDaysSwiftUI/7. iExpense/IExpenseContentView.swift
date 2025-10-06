@@ -86,7 +86,7 @@ private struct AddExpenseView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var name = ""
-    @State private var type = ""
+    @State private var type = "Business"
     @State private var amount = 0.0
 
     var expenses: Expenses
@@ -101,8 +101,10 @@ private struct AddExpenseView: View {
                 Picker("Type", selection: $type) {
                     ForEach(types, id: \.self) {
                         Text($0)
+                            .buttonStyle(.borderedProminent)
                     }
                 }
+                .buttonStyle(.borderedProminent)
 
                 TextField(
                     "Amount",

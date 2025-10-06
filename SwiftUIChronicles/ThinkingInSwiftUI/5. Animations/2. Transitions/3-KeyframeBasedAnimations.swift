@@ -56,7 +56,7 @@ struct KeyframeBasedAnimationsContentView: View {
 /// offset and the other for the rotation angle. While the keyframes within a
 /// single track run in sequence, the tracks themselves run in parallel.
 ///
-/// - IMportant: In general, tracks don’t have to have the same duration. If a
+/// - Important: In general, tracks don’t have to have the same duration. If a
 /// track ends while other tracks are still running, the track will report its
 /// final value for the rest of the animation. Note that in the `keyframeAnimator`
 /// method, we also receive the current value. Initially, this will be

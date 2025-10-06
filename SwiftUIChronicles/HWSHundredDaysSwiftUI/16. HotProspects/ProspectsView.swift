@@ -10,6 +10,7 @@ import CodeScanner
 import SwiftData
 import SwiftUI
 import UserNotifications
+import UIKit
 
 struct ProspectsView: View {
     enum FilterType {

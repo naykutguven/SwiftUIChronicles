@@ -150,7 +150,33 @@ struct ByeView: View {
 /// within the group.
 struct GroupAsRootView: View {
     var body: some View {
+        // Group acts as a layout-agnostic abstraction around a view builder. So,
+        // view modifiers applied to a `Group` are actually applied to each element (view)
+        // in the group.
+        Group {
+            Image(systemName: "hand.wave")
+            Text("Hello")
+        }
+        .border(.purple)
+
+        // Unless that `Group` is the only subview in a `ScrollView` or the root view. Then,
+        // it acts like a `VStack`. The modifier is applied to the container.
         ScrollView {
+            Group {
+                Image(systemName: "hand.wave")
+                Text("Hello")
+            }
+            .border(.purple)
+        }
+
+        // Not the only view -> the modifier is applied to each view separately.
+        ScrollView {
+            Group {
+                Image(systemName: "hand.wave")
+                Text("Hello")
+            }
+            .border(.purple)
+
             Group {
                 Image(systemName: "hand.wave")
                 Text("Hello")

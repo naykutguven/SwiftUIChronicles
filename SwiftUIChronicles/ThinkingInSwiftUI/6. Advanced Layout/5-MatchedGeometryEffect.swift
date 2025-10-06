@@ -98,7 +98,7 @@ struct MatchedGeometryEffectTransitionContentView: View {
             } else {
                 circle
                 // When we apply different colors, it looks a bit weird idk.
-                    .fill(Color.red)
+//                    .fill(Color.red)
                     .matchedGeometryEffect(id: "image", in: namespace)
                     .frame(width: 30, height: 30)
             }

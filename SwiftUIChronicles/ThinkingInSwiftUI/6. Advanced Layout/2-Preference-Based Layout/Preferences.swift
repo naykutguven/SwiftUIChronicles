@@ -91,7 +91,7 @@ struct ZStackFlowLayoutExample: View {
 private struct ZStackFlowLayout: View {
     @State private var sizes: [CGSize]? = nil
     var containerWidth: CGFloat
-    let subviewCount = 5
+    let subviewCount = 15
 
     func subview(for index: Int) -> some View {
         Text("Item \(index)" + String(repeating: "\n", count: index / 2))
@@ -107,7 +107,7 @@ private struct ZStackFlowLayout: View {
             layout(sizes: $0, containerWidth: containerWidth).map { $0.origin }
         } ?? Array(repeating: .zero, count: subviewCount)
         ZStack(alignment: .topLeading) {
-            ForEach(0..<subviewCount) { ix in
+            ForEach(0..<subviewCount, id: \.self) { ix in
                 subview(for: ix)
                     .fixedSize()
                     .measureSize()
@@ -144,4 +144,8 @@ private struct ZStackFlowLayout: View {
 
 #Preview {
     PreferencesContentView()
+}
+
+#Preview {
+    ZStackFlowLayoutExample()
 }

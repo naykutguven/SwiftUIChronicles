@@ -34,8 +34,7 @@ import SwiftUI
 /// as possible to avoid unintended side eﬀects, especially when we make changes
 /// to our code later on.
 ///
-/// Another implicit animation modifier, [`animation(_:body:)`]
-/// (https://developer.apple.com/documentation/swiftui/view/animation(_:body:))
+/// Another implicit animation modifier, [`animation(_:body:)`](https://developer.apple.com/documentation/swiftui/view/animation(_:body:))
 /// is available in iOS 17.0+ and seems pretty useful. It allows us to scope
 /// implicit animations to specific modifiers.
 ///
